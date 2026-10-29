@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     max_upload_size_bytes: int = 5 * 1024 * 1024
 
+    imagekit_private_key: str
+    imagekit_url_endpoint: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

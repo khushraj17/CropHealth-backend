@@ -21,10 +21,6 @@ class Scan(Base):
         default=uuid.uuid4,
     )
 
-    image_path: Mapped[str] = mapped_column(
-        String(500),
-        nullable=False,
-    )
 
     crop_type: Mapped[str | None] = mapped_column(
         String(100),
@@ -51,4 +47,13 @@ class Scan(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+    image_url: Mapped[str | None] = mapped_column(
+        String(1000),
+        nullable=True,
+    )
+
+    imagekit_file_id: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
     )

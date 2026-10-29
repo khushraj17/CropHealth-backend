@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 import uuid
 from datetime import datetime
+
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -36,30 +36,25 @@ def normalize_crop_type(value: str | None) -> str | None:
 
 
 class ScanCreate(BaseModel):
-    image_path: str = Field(min_length=1, max_length=500)
     crop_type: str | None = Field(default=None, max_length=100)
 
     @field_validator("crop_type")
     @classmethod
     def validate_crop_type(cls, value: str | None) -> str | None:
-        if value is None:
-            return value
+        return normalize_crop_type(value)
 
-        normalized = value.strip().lower()
 
-        if not normalized:
-            raise ValueError("crop_type cannot be empty")
+class PredictionResponse(BaseModel):
+    disease: str
+    confidence: float = Field(ge=0, le=100)
 
-        if normalized not in SUPPORTED_CROPS:
-            raise ValueError("Unsupported crop type")
-
-        return normalized
 
 class ScanResponse(BaseModel):
     id: uuid.UUID
     crop_type: str | None
     status: str
     created_at: datetime
+    image_url: str | None = None
     prediction: PredictionResponse | None = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -86,13 +81,10 @@ class ScanResponse(BaseModel):
             "crop_type": value.crop_type,
             "status": value.status,
             "created_at": value.created_at,
+            "image_url": getattr(value, "image_url", None),
             "prediction": prediction,
         }
 
 
 class ScanUploadResponse(ScanResponse):
     prediction: PredictionResponse
-
-class PredictionResponse(BaseModel):
-    disease: str
-    confidence: float = Field(ge=0, le=100)
